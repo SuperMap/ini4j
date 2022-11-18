@@ -21,17 +21,12 @@ import org.ini4j.test.DwarfsData;
 import org.ini4j.test.Helper;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
+import java.util.concurrent.*;
 
 public class IniTest extends Ini4jCase
 {
@@ -40,6 +35,7 @@ public class IniTest extends Ini4jCase
     private static final String INI_ONE_HEADER = COMMENT_ONLY + "\n\n[section]\nkey=value\n";
     private static final String COMMENTED_OPTION = COMMENT_ONLY + "\n\n[section]\n;comment\nkey=value\n";
     private static final String MULTI = "[section]\noption=value\noption=value2\n[section]\noption=value3\noption=value4\noption=value5\n";
+    private static final String DOS_PATH = "src/test/resources/org/ini4j/IniTest/cve-2022-41404.ini";
 
     @Test public void testCommentedOption() throws Exception
     {
@@ -242,5 +238,26 @@ public class IniTest extends Ini4jCase
 
         ini.store(writer);
         assertEquals("#section-comment\n[section]\noption = value\n\n", writer.toString());
+    }
+
+    @Test
+    public void testCVE_2022_41404() throws Exception {
+        ExecutorService exs = Executors.newFixedThreadPool(1);
+        Callable cal = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    Ini ini = new Ini();
+                    ini.load(new File(DOS_PATH));
+                    ini.get("deploy").fetch("a");
+                    missing(IllegalArgumentException.class);
+                } catch (IllegalArgumentException x) {
+                    //x
+                }
+                return null;
+            }
+        };
+        Future fa = exs.submit(cal);
+        fa.get(10, TimeUnit.SECONDS);
     }
 }

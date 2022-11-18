@@ -26,8 +26,10 @@ import java.lang.reflect.Proxy;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 public class BasicProfile extends CommonMultiMap<String, Profile.Section> implements Profile
 {
+    private static final char SUBST_CHAR = '$';
     private static final String SECTION_SYSTEM_PROPERTIES = "@prop";
     private static final String SECTION_ENVIRONMENT = "@env";
     private static final Pattern EXPRESSION = Pattern.compile(
@@ -169,6 +171,13 @@ public class BasicProfile extends CommonMultiMap<String, Profile.Section> implem
 
     void resolve(StringBuilder buffer, Section owner)
     {
+        doResolve(buffer, owner, 10);
+    }
+    private void doResolve(StringBuilder buffer, Section owner,int deep){
+        if (deep ==  0 ){
+            throw new IllegalArgumentException("recursive calls exceeded!");
+        }
+        deep--;
         Matcher m = EXPRESSION.matcher(buffer);
 
         while (m.find())
@@ -189,7 +198,12 @@ public class BasicProfile extends CommonMultiMap<String, Profile.Section> implem
             }
             else if (section != null)
             {
-                value = (optionIndex == -1) ? section.fetch(optionName) : section.fetch(optionName, optionIndex);
+                value = (optionIndex == -1) ? section.get(optionName) : section.get(optionName, optionIndex);
+                if ((value != null) && (value.indexOf(SUBST_CHAR) >= 0)) {
+                    StringBuilder b = new StringBuilder(value);
+                    doResolve(b,section,deep);
+                    value = b.toString();
+                }
             }
 
             if (value != null)
