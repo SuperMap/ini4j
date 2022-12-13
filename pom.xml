@@ -3,18 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.ini4j</groupId>
     <artifactId>ini4j</artifactId>
-    <version>0.5.5-SNAPSHOT</version>
+    <version>0.5.5-sm-221213</version>
     <name>ini4j</name>
     <description>Java API for handling configuration files in Windows .ini format. The library includes its own Map based API, Java Preferences API and Java Beans API for handling .ini files. Additionally, the library includes a feature rich (variable/macro substitution, multiply property values, etc) java.util.Properties replacement.</description>
     <packaging>jar</packaging>
     <url>http://www.ini4j.org</url>
     <scm>
-        <connection>scm:svn:svn+ssh://szkiba@svn.code.sf.net/p/ini4j/code/trunk</connection>
-        <developerConnection>scm:svn:svn+ssh://szkiba@svn.code.sf.net/p/ini4j/code/trunk</developerConnection>
-        <url>https://svn.code.sf.net/p/ini4j/code/trunk/</url>
+        <connection>scm:git:git@github.com:SuperMap/ini4j.git</connection>
+        <developerConnection>scm:git:git@github.com:SuperMap/ini4j.git</developerConnection>
+        <url>https://github.com/SuperMap/ini4j/tree/master</url>
+        <tag>0.5.5-sm-221213</tag>
     </scm>
     <distributionManagement>
-        <repository>
+        <!--<repository>
             <id>ini4j-release</id>
             <name>[ini4j] releases on OSSRH</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
@@ -28,7 +29,7 @@
             <id>ini4j-site</id>
             <name>[ini4j] site on SourceForge</name>
             <url>scpexe://shell.sourceforge.net/home/project-web/ini4j/htdocs</url>
-        </site>
+        </site>-->
     </distributionManagement>
     <issueManagement>
         <system>sourceforge</system>
@@ -378,7 +379,6 @@
                     </execution>
                 </executions>
             </plugin>            
-            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-changes-plugin</artifactId>
@@ -422,6 +422,9 @@
                     </execution>
                 </executions>
             </plugin>
+            
+            
+            
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
@@ -456,6 +459,7 @@
                     </execution>
                 </executions>
             </plugin>
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
