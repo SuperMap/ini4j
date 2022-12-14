@@ -20,9 +20,6 @@ import org.ini4j.sample.Dwarfs;
 import org.ini4j.test.DwarfsData;
 import org.ini4j.test.Helper;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-
 import org.junit.Test;
 
 import java.io.*;
@@ -252,12 +249,63 @@ public class IniTest extends Ini4jCase
                     ini.get("deploy").fetch("a");
                     missing(IllegalArgumentException.class);
                 } catch (IllegalArgumentException x) {
-                    //x
+                    System.out.println(x.getMessage());
+                    assertEquals("recursive infinite loop: [test].a = ${deploy/a}", x.getMessage());
                 }
                 return null;
             }
         };
         Future fa = exs.submit(cal);
+        fa.get(10, TimeUnit.SECONDS);
+
+        cal = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    Ini ini = new Ini();
+                    ini.load(new File(DOS_PATH));
+                    ini.get("nomal").fetch("c");
+                    missing(IllegalArgumentException.class);
+                } catch (IllegalArgumentException x) {
+                    System.out.println(x.getMessage());
+                    assertEquals("recursive infinite loop: [nomal].d = ${test/a}", x.getMessage());
+                }
+                return null;
+            }
+        };
+        fa = exs.submit(cal);
+        fa.get(10, TimeUnit.SECONDS);
+
+        cal = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    Ini ini = new Ini();
+                    ini.load(new File(DOS_PATH));
+                    assertEquals("45", ini.get("nomal").fetch("a"));
+                } catch (IllegalArgumentException x) {
+                    fail("should success");
+                }
+                return null;
+            }
+        };
+        fa = exs.submit(cal);
+        fa.get(10, TimeUnit.SECONDS);
+
+        cal = new Callable() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    Ini ini = new Ini();
+                    ini.load(new File(DOS_PATH));
+                    assertEquals("45", ini.get("nomal").fetch("b"));
+                } catch (IllegalArgumentException x) {
+                    fail("should success");
+                }
+                return null;
+            }
+        };
+        fa = exs.submit(cal);
         fa.get(10, TimeUnit.SECONDS);
     }
 }

@@ -23,6 +23,7 @@ import org.ini4j.spi.IniHandler;
 import java.lang.reflect.Array;
 import java.lang.reflect.Proxy;
 
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -169,15 +170,13 @@ public class BasicProfile extends CommonMultiMap<String, Profile.Section> implem
         return new BasicProfileSection(this, name);
     }
 
-    void resolve(StringBuilder buffer, Section owner)
-    {
-        doResolve(buffer, owner, 10);
+    void resolve(StringBuilder buffer, Section owner) {
+        HashMap<String, String> map = new HashMap<>();
+        doResolve(buffer, owner, map);
+        map.clear();
     }
-    private void doResolve(StringBuilder buffer, Section owner,int deep){
-        if (deep ==  0 ){
-            throw new IllegalArgumentException("recursive calls exceeded!");
-        }
-        deep--;
+
+    private void doResolve(StringBuilder buffer, Section owner, HashMap<String, String> map) {
         Matcher m = EXPRESSION.matcher(buffer);
 
         while (m.find())
@@ -195,13 +194,18 @@ public class BasicProfile extends CommonMultiMap<String, Profile.Section> implem
             else if (SECTION_SYSTEM_PROPERTIES.equals(sectionName))
             {
                 value = Config.getSystemProperty(optionName);
-            }
-            else if (section != null)
+            } 
+            else if (section != null) 
             {
                 value = (optionIndex == -1) ? section.get(optionName) : section.get(optionName, optionIndex);
                 if ((value != null) && (value.indexOf(SUBST_CHAR) >= 0)) {
+                    if (map.containsKey(value)) {
+                        throw new IllegalArgumentException("recursive infinite loop: " + map.get(value) + " = " + value);
+                    } else {
+                        map.put(value, "[" + sectionName + "]." + optionName);
+                    }
                     StringBuilder b = new StringBuilder(value);
-                    doResolve(b,section,deep);
+                    doResolve(b, section, map);
                     value = b.toString();
                 }
             }
